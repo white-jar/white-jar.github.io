@@ -1,49 +1,146 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from "astro:content";
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Profile from '../components/Profile.astro';
+import Sidebar from '../components/Sidebar.astro';
+
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const recentPosts = sortedPosts.slice(0, 5);
+
+const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
+
+const categories = [
+  { name: 'C#', slug: 'csharp' },
+  { name: 'Web', slug: 'web' },
+  { name: 'AI', slug: 'ai' },
+  { name: 'Arduino', slug: 'arduino' },
+  { name: 'Raspberry Pi', slug: 'raspberry-pi' },
+  { name: '音響改裝', slug: 'audio' },
+];
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
-</html>
+<BaseLayout pageTitle="泥巴人">
+  <Profile
+    name="泥巴人"
+    subtitle="強・Kelvin"
+    bio="手沾泥巴的開發者。寫 C#、Web、AI，也玩 Arduino、Raspberry Pi 跟音響改裝。這裡記錄技術踩坑與 side project 的點滴。"
+    tags={["C#", "Web", "AI", "Arduino", "Raspberry Pi", "音響改裝"]}
+  />
+
+  <div class="main">
+    <section>
+      <h2 class="section-title">最新文章</h2>
+      <div class="post-list">
+        {recentPosts.length > 0 ? (
+          recentPosts.map((post) => (
+            <article class="post-card">
+              <div class="post-meta">
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {post.data.pubDate.toISOString().slice(0, 10)}
+                </time>
+              </div>
+              <h2><a href={`/posts/${post.id}`}>{post.data.title}</a></h2>
+              <p>{post.data.description}</p>
+              {post.data.tags && (
+                <div class="post-tags">
+                  {post.data.tags.map((tag) => (
+                    <a href={`/tags/${encodeURIComponent(tag)}`}>#{tag}</a>
+                  ))}
+                </div>
+              )}
+            </article>
+          ))
+        ) : (
+          <p style="color: var(--color-text-secondary); padding: var(--space-lg);">
+            還沒有人發表文章。
+          </p>
+        )}
+      </div>
+    </section>
+
+    <Sidebar allPosts={allPosts} allTags={allTags} />
+  </div>
+</BaseLayout>
+
+<style>
+  /* ===== Main Layout ===== */
+  .main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg) var(--space-2xl);
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-xl);
+  }
+
+  /* ===== Recent Posts ===== */
+  .section-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .post-list { display: flex; flex-direction: column; gap: var(--space-lg); }
+  .post-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+    transition: border-color 0.2s, box-shadow 0.25s;
+  }
+  .post-card:hover {
+    border-color: var(--color-accent-muted);
+    box-shadow: 0 2px 20px oklch(0% 0 0 / 0.04);
+  }
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xs);
+  }
+  .post-card h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    margin-bottom: var(--space-sm);
+  }
+  .post-card h2 a:hover {
+    color: var(--color-accent);
+  }
+  .post-card p {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+  }
+  .post-tags a {
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-tag-bg);
+    color: var(--color-text-secondary);
+    transition: background 0.2s, color 0.2s;
+  }
+  .post-tags a:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+  }
+</style>

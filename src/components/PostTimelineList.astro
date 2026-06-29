@@ -1,0 +1,323 @@
+---
+interface Props {
+  posts: any[];
+  excludeSlug?: string;
+  limit?: number;
+  groupByYear?: boolean;
+  accordion?: boolean;
+}
+
+const {
+  posts: rawPosts,
+  excludeSlug,
+  limit,
+  groupByYear = true,
+  accordion = true,
+} = Astro.props;
+
+let filtered = excludeSlug
+  ? rawPosts.filter((p) => p.id !== excludeSlug)
+  : [...rawPosts];
+
+filtered.sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+if (limit !== undefined) {
+  filtered = filtered.slice(0, limit);
+}
+
+interface YearGroup {
+  year: number;
+  posts: typeof filtered;
+}
+
+let groups: YearGroup[] = [];
+
+if (groupByYear) {
+  const map = new Map<number, typeof filtered>();
+  for (const post of filtered) {
+    const y = post.data.pubDate.getFullYear();
+    if (!map.has(y)) map.set(y, []);
+    map.get(y)!.push(post);
+  }
+  groups = Array.from(map.entries())
+    .sort(([a], [b]) => b - a)
+    .map(([year, posts]) => ({ year, posts }));
+} else {
+  groups = [{ year: 0, posts: filtered }];
+}
+
+const hasNoData = groups.length === 0;
+const formatDate = (d: Date) => {
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm}-${dd}`;
+};
+---
+
+{
+  hasNoData ? null : (
+    <div class="timeline" data-accordion={String(accordion)}>
+      {groups.map((g, i) => (
+        <div
+          class={`year-group ${i === 0 && accordion ? "is-open" : ""} ${
+            !accordion ? "is-expanded" : ""
+          }`}
+        >
+          <div class="year-header">
+            <span class="year-label">{g.year || "文章"}</span>
+            <span class="year-count">{g.posts.length}</span>
+            {groupByYear && <span class="year-arrow">&#9654;</span>}
+          </div>
+          <div class="post-list">
+            <div class="post-items">
+              {g.posts.map((post) => (
+                <div class="post-item">
+                  <span class="post-date">
+                    {formatDate(post.data.pubDate)}
+                  </span>
+                  <a class="post-title-link" href={`/posts/${post.id}`}>
+                    {post.data.title}
+                  </a>
+                  {post.data.tags && (
+                    <div class="post-tags">
+                      {post.data.tags.map((tag: string) => (
+                        <span>#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+<script>
+  (function () {
+    const timeline = document.querySelector(".timeline");
+    if (!timeline || timeline.dataset.accordion !== "true") return;
+
+    const groups = timeline.querySelectorAll<HTMLElement>(".year-group");
+    groups.forEach((group) => {
+      const header = group.querySelector<HTMLElement>(".year-header");
+      if (!header) return;
+      header.addEventListener("click", () => {
+        const isOpen = group.classList.contains("is-open");
+        if (!isOpen) {
+          groups.forEach((el) => el.classList.remove("is-open"));
+        }
+        group.classList.toggle("is-open");
+      });
+    });
+  })();
+</script>
+
+<style>
+  .timeline {
+    position: relative;
+    padding-left: var(--space-xl);
+  }
+
+  /* vertical line */
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    bottom: 0;
+    width: 1.5px;
+    background: var(--color-border);
+    transition: background 0.3s;
+  }
+
+  .year-group {
+    position: relative;
+    margin-bottom: var(--space-lg);
+  }
+  .year-group:last-child {
+    margin-bottom: 0;
+  }
+
+  /* dot */
+  .year-group::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--space-xl) - 4px);
+    top: 0.6rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-border);
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    z-index: 2;
+  }
+
+  .year-group.is-open::before {
+    background: var(--color-accent);
+    transform: scale(1.4);
+  }
+
+  /* year header */
+  .year-header {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    user-select: none;
+    padding: var(--space-xs) 0;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .year-header:hover {
+    color: var(--color-accent);
+  }
+
+  .year-label {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .year-count {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    background: var(--color-tag-bg);
+    padding: 0.1rem 0.5rem;
+    border-radius: 99px;
+    transition: background 0.2s;
+  }
+  .year-header:hover .year-count {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .year-arrow {
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-block;
+  }
+  .year-group.is-open .year-arrow {
+    transform: rotate(90deg);
+  }
+
+  /* collapsible post list */
+  .post-list {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.3s ease;
+  }
+  .year-group.is-open .post-list,
+  .year-group.is-expanded .post-list {
+    max-height: 2000px;
+    opacity: 1;
+  }
+
+  .post-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0 var(--space-sm);
+  }
+
+  .post-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    transition: background 0.2s;
+  }
+  .post-item:hover {
+    background: var(--color-accent-soft);
+  }
+
+  .post-date {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    min-width: 3.2rem;
+    flex-shrink: 0;
+  }
+
+  .post-title-link {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    transition: color 0.2s;
+    line-height: 1.4;
+  }
+  .post-item:hover .post-title-link {
+    color: var(--color-accent);
+  }
+
+  .post-item .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .post-item .post-tags span {
+    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    padding: 0.05rem 0.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-tag-bg);
+    color: var(--color-text-secondary);
+  }
+
+  /* ---- tl-needle-glow: dot glow ---- */
+  .year-group.is-open::before {
+    box-shadow:
+      0 0 0 5px oklch(78% 0.1 230 / 0.35),
+      0 0 0 14px oklch(78% 0.1 230 / 0.12),
+      0 0 32px 8px oklch(78% 0.1 230 / 0.18);
+  }
+
+  /* ---- tl-needle-glow: year header self-glow ---- */
+  .year-group.is-open .year-header {
+    background: oklch(78% 0.1 230 / 0.15);
+    border-radius: 99px;
+    padding: 0.3rem 0.8rem 0.3rem 0.3rem;
+    margin-left: -0.3rem;
+    box-shadow:
+      0 0 12px oklch(78% 0.1 230 / 0.3),
+      0 0 36px oklch(78% 0.1 230 / 0.18),
+      inset 0 0 16px oklch(78% 0.1 230 / 0.1);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  /* ---- responsive ---- */
+  @media (max-width: 768px) {
+    .timeline {
+      padding-left: var(--space-lg);
+    }
+    .year-group::before {
+      left: calc(-1 * var(--space-lg) - 4px);
+    }
+    .year-label {
+      font-size: 1.3rem;
+    }
+    .post-item {
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+    }
+    .post-item .post-tags {
+      margin-left: 0;
+    }
+    .post-date {
+      min-width: 2.8rem;
+    }
+  }
+</style>

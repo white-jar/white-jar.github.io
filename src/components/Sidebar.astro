@@ -1,0 +1,84 @@
+---
+import CategoryCard from './CategoryCard.jsx';
+
+const { allPosts, allTags } = Astro.props;
+
+const tagCountMap = new Map();
+for (const post of allPosts) {
+  for (const tag of post.data.tags) {
+    tagCountMap.set(tag, (tagCountMap.get(tag) || 0) + 1);
+  }
+}
+const categories = [...tagCountMap.entries()]
+  .map(([name, count]) => ({ name, count }));
+---
+
+<aside class="sidebar">
+  <CategoryCard categories={categories} client:load />
+
+  <div class="widget">
+    <h3 class="widget-title">標籤</h3>
+    <div class="tag-cloud">
+      {allTags.map((tag) => (
+        <a href={`/tags/${encodeURIComponent(tag)}`}>{tag}</a>
+      ))}
+    </div>
+  </div>
+
+  <div class="widget">
+    <h3 class="widget-title">社群</h3>
+    <p class="widget-social">
+      <a href="https://github.com/StrongKelvin">GitHub</a> ·
+      <a href="#">Twitter</a> ·
+      <a href="#">LinkedIn</a>
+    </p>
+  </div>
+</aside>
+
+<style>
+  .sidebar { display: flex; flex-direction: column; gap: var(--space-xl); }
+  .widget {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-border);
+  }
+  .widget-title {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+  }
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  .tag-cloud a {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-tag-bg);
+    color: var(--color-text-secondary);
+    transition: background 0.2s, color 0.2s;
+  }
+  .tag-cloud a:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+  .widget-social {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    line-height: 2;
+  }
+  .widget-social a {
+    color: var(--color-accent);
+    transition: color 0.2s;
+  }
+  .widget-social a:hover {
+    color: var(--color-text);
+  }
+</style>

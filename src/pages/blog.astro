@@ -1,0 +1,53 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Profile from '../components/Profile.astro';
+import Sidebar from '../components/Sidebar.astro';
+import PostTimelineList from '../components/PostTimelineList.astro';
+
+const allPosts = await getCollection('blog');
+
+const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
+---
+<BaseLayout pageTitle="所有文章">
+  <Profile
+    name="泥巴人"
+    subtitle="強・Kelvin"
+    bio="手沾泥巴的開發者。寫 C#、Web、AI，也玩 Arduino、Raspberry Pi 跟音響改裝。這裡記錄技術踩坑與 side project 的點滴。"
+    tags={["C#", "Web", "AI", "Arduino", "Raspberry Pi", "音響改裝"]}
+  />
+  <div class="main">
+    <section>
+      <h2 class="section-title">所有文章</h2>
+      <PostTimelineList posts={allPosts} accordion={true} />
+    </section>
+
+    <Sidebar {allPosts} {allTags} />
+  </div>
+</BaseLayout>
+
+<style>
+  .main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg) var(--space-2xl);
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-xl);
+  }
+
+  .section-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,127 @@
+---
+interface Props {
+  name: string;
+  subtitle: string;
+  bio: string;
+  tags: string[];
+  backgroundImage?: string;
+  avatarImage?: string;
+}
+
+const {
+  name,
+  subtitle,
+  bio,
+  tags,
+  backgroundImage = '/images/花蓮大農大富.png',
+  avatarImage = '/images/花蓮海邊人物.png',
+} = Astro.props;
+---
+
+<div class="hero-wrap">
+  <div class="hero-overlay"></div>
+  <div class="hero">
+    <div class="hero-avatar" style={`background-image: url('${avatarImage}')`}></div>
+    <div class="hero-body">
+      <h1>{name}</h1>
+      <p class="sub">{subtitle}</p>
+      <p class="bio">{bio}</p>
+      <div class="tech-tags">
+        {tags.map((tag) => <span>{tag}</span>)}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hero-wrap {
+    position: relative;
+    background: var(--color-bg);
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+  }
+  .hero-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/花蓮大農大富.png');
+    background-size: cover;
+    background-position: center 25%;
+    background-repeat: no-repeat;
+    filter: saturate(0.85) brightness(0.95);
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      oklch(97% 0.006 60 / 0.15) 0%,
+      oklch(97% 0.006 60 / 0.6) 50%,
+      var(--color-bg) 100%
+    );
+    pointer-events: none;
+  }
+  .hero {
+    position: relative;
+    z-index: 1;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) var(--space-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    width: 100%;
+  }
+  .hero-avatar {
+    width: 210px;
+    height: 210px;
+    border-radius: var(--radius-md);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    border: 2px solid var(--color-border);
+  }
+  .hero-body h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .hero-body .sub {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-top: var(--space-sm);
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+  .hero-body .bio {
+    margin-top: var(--space-md);
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    max-width: 34rem;
+    line-height: 1.7;
+  }
+  .hero-body .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+  }
+  .hero-body .tech-tags span {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 768px) {
+    .hero { flex-direction: column; text-align: center; padding-top: var(--space-xl); }
+    .hero-body .bio { margin-left: auto; margin-right: auto; }
+    .hero-body .tech-tags { justify-content: center; }
+    .hero-wrap::before { background-position: center 20%; }
+    .hero-avatar { width: 140px; height: 140px; }
+  }
+</style>

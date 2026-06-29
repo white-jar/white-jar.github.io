@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from 'astro:content';
+import MarkdownPostLayout from '../../layouts/MarkdownPostLayout.astro';
+import Giscus from  '../../components/Giscus.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.id }, props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<MarkdownPostLayout frontmatter={post.data} postId={post.id}>
+  <Content />
+  <Giscus />
+
+
+  <style is:global>
+  /* 评论区域样式 */
+  .comments-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+  }
+
+  /* Giscus 容器样式 */
+  .giscus {
+      margin-top: 1.5rem;
+      min-height: 300px;
+      border-radius: var(--radius-large);
+      overflow: hidden;
+  }
+
+  /* 暗色模式适配 */
+  :global(html.dark) .giscus-frame {
+      color-scheme: dark;
+  }
+
+  </style>
+</MarkdownPostLayout>

@@ -1,0 +1,263 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from './BaseLayout.astro';
+import Profile from '../components/Profile.astro';
+import Sidebar from '../components/Sidebar.astro';
+import PostTimelineList from '../components/PostTimelineList.astro';
+import {Icon} from 'astro-icon/components';
+
+const { frontmatter, postId } = Astro.props;
+const allPosts = await getCollection('blog');
+const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
+---
+<BaseLayout pageTitle={frontmatter.title}>
+  <Profile
+    name="泥巴人"
+    subtitle="強・Kelvin"
+    bio="手沾泥巴的開發者。寫 C#、Web、AI，也玩 Arduino、Raspberry Pi 跟音響改裝。這裡記錄技術踩坑與 side project 的點滴。"
+    tags={["C#", "Web", "AI", "Arduino", "Raspberry Pi", "音響改裝"]}
+  />
+  <div class="main">
+    <article class="post-article">
+      <header class="post-header">
+        <h1 class="post-title">{frontmatter.title}</h1>
+        <div class="post-meta-bar">
+          <time datetime={frontmatter.pubDate.toISOString()}>
+            {frontmatter.pubDate.toLocaleDateString()}
+          </time>
+          <span class="meta-sep">·</span>
+          <span>{frontmatter.author}</span>
+        </div>
+        {frontmatter.description && (
+          <p class="post-description">{frontmatter.description}</p>
+        )}
+        {frontmatter.image?.url && (
+          <img
+            class="post-hero"
+            src={frontmatter.image.url}
+            alt={frontmatter.image.alt}
+          />
+        )}
+        {frontmatter.tags && (
+          <div class="post-tags">
+            {frontmatter.tags.map((tag) => (
+              <a href={`/tags/${encodeURIComponent(tag)}`}>#{tag}</a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div class="post-content">
+        <slot />
+      </div>
+
+      <section class="recent-timeline">
+        <h2 class="section-title">近期文章</h2>
+        <PostTimelineList
+          posts={allPosts}
+          excludeSlug={postId}
+          limit={5}
+          accordion={false}
+        />
+      </section>
+    </article>
+
+    <Sidebar allPosts={allPosts} allTags={allTags} />
+  </div>
+</BaseLayout>
+
+<style>
+  .main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-lg) var(--space-2xl);
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-xl);
+  }
+
+  .post-header {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+  }
+
+  .post-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-bottom: var(--space-md);
+  }
+
+  .post-meta-bar {
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .meta-sep {
+    color: var(--color-border);
+  }
+
+  .post-description {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .post-hero {
+    width: 100%;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  .post-tags a {
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-tag-bg);
+    color: var(--color-text-secondary);
+    transition: background 0.2s, color 0.2s;
+  }
+  .post-tags a:hover {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  /* ===== Content Area ===== */
+  .post-content {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-text);
+  }
+
+  .post-content h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .post-content h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-sm);
+  }
+
+  .post-content p {
+    margin-bottom: var(--space-md);
+  }
+
+  .post-content a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .post-content a:hover {
+    color: var(--color-accent-muted);
+  }
+
+  .post-content ul,
+  .post-content ol {
+    margin: 0 0 var(--space-md) var(--space-lg);
+  }
+
+  .post-content li {
+    margin-bottom: var(--space-sm);
+  }
+
+  .post-content blockquote {
+    border-left: 3px solid var(--color-accent-muted);
+    padding-left: var(--space-lg);
+    margin: var(--space-lg) 0;
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+
+  .post-content img {
+    width: 100%;
+    border-radius: var(--radius-md);
+    margin: var(--space-lg) 0;
+  }
+
+  .post-content pre {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    overflow-x: auto;
+    margin: var(--space-lg) 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .post-content code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--color-tag-bg);
+    padding: 0.1em 0.3em;
+    border-radius: var(--radius-sm);
+  }
+
+  .post-content pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-xl) 0;
+  }
+
+  .recent-timeline {
+    margin-top: var(--space-xl);
+  }
+
+  .section-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 768px) {
+    .main {
+      grid-template-columns: 1fr;
+      padding: 0 var(--space-md) var(--space-lg);
+    }
+    .post-header,
+    .post-content {
+      padding: var(--space-lg);
+    }
+    .post-title {
+      font-size: 1.3rem;
+    }
+  }
+</style>

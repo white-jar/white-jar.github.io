@@ -8,4 +8,7 @@ import icon from "astro-icon";
 export default defineConfig({
   site: "https://white-jar.github.io",
   integrations: [preact(), icon()],
+  server: {
+    port: 3000,
+  },
 });

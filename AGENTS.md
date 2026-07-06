@@ -4,7 +4,7 @@
 
 ## 專案
 
-一個以 **Astro 6**（靜態輸出）搭配 **Preact** islands 提供互動性所建置的個人部落格（「泥巴人 / 強・Kelvin」）。透過 GitHub Actions 部署到 GitHub Pages。內容與 UI 文案主要為繁體中文。
+一個以 **Astro 6**（靜態輸出）搭配 **Preact** islands 提供互動性所建置的個人部落格（「純白罐子 / 州・Kevin」）。透過 GitHub Actions 部署到 GitHub Pages。內容與 UI 文案主要為繁體中文。
 
 需要 Node `>=22.12.0`（CI 使用 Node 24）。
 

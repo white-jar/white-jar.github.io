@@ -41,7 +41,7 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
         {frontmatter.tags && (
           <div class="post-tags">
             {frontmatter.tags.map((tag) => (
-              <a href={`/tags/${encodeURIComponent(tag)}`}>#{tag}</a>
+              <a href={`/tags/${tag.replace(/#/g, 'sharp')}`}>#{tag}</a>
             ))}
           </div>
         )}

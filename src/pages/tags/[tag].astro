@@ -4,6 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import BlogPost from "../../components/BlogPost.astro";
 import Profile from "../../components/Profile.astro";
 import Sidebar from "../../components/Sidebar.astro";
+import { tagToSlug } from "../../utils/tag";
 
 export async function getStaticPaths() {
     const allPosts = await getCollection("blog");
@@ -18,17 +19,17 @@ export async function getStaticPaths() {
             post.data.tags.includes(tag),
         );
         return {
-            params: { tag },
-            props: { posts: filteredPosts, allPosts, allTags },
+            params: { tag: tagToSlug(tag) },
+            props: { posts: filteredPosts, allPosts, allTags, originalTag: tag },
         };
     });
 }
 
 const { tag } = Astro.params;
-const { posts, allPosts, allTags } = Astro.props;
+const { posts, allPosts, allTags, originalTag } = Astro.props;
 ---
 
-<BaseLayout pageTitle={tag}>
+<BaseLayout pageTitle={originalTag}>
     <Profile
         name="純白罐子"
         subtitle="州・Kevin"
@@ -37,7 +38,7 @@ const { posts, allPosts, allTags } = Astro.props;
     />
     <div class="main">
         <section>
-            <h2 class="section-title">#{tag}（共 {posts.length} 篇文章）</h2>
+            <h2 class="section-title">#{originalTag}（共 {posts.length} 篇文章）</h2>
             <ul class="post-list">
                 {
                     posts.map((post) => (

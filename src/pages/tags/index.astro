@@ -1,36 +1,91 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-// const tags = ['astro', 'blogging', 'learning in public', 'successes', 'setbacks', 'community']
-const allPosts = Object.values(import.meta.glob<{ frontmatter: { tags: string[] } }>('../../blog/**/*.md', {eager: true}));
-const tags = [...new Set(allPosts.map((post) => post.frontmatter.tags).flat())];
-const pageTitle = "標簽索引";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Profile from "../../components/Profile.astro";
+import Sidebar from "../../components/Sidebar.astro";
+
+const allPosts = await getCollection("blog");
+const allTags = [...new Set(allPosts.map((p) => p.data.tags).flat())].sort();
+
+const pageTitle = "標籤索引";
 ---
-<style>
-  a {
-    color: #00539F;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    margin: 0.25em;
-    border: dotted 1px #a1a1a1;
-    border-radius: .5em;
-    padding: .5em 1em;
-    font-size: 1.15em;
-    background-color: #F8FCFD;
-  }
-</style>
 
 <BaseLayout pageTitle={pageTitle}>
-  <div class="tags">
-    {tags.map((tag) => (
-      <div class="tag">
-        <a href={`/tags/${tag.replace(/#/g, 'sharp')}`}>{tag}</a>
-      </div>
-    ))}
-  </div>
+    <Profile
+        name="純白罐子"
+        subtitle="州・Kevin"
+        bio="我將邏輯與演算法投入罐子, 碎片化的程式碼以滴漏方式逐步加入, 以思緒做攪拌捧徐徐的攪拌, 以舊日情懷激情的溫度進行催化, 罐子中進行一連串的化學反應, 當胸口熱情的溫度逐漸降到常溫, 拿出濾紙過濾, 竟然萃取出一堆的 bug。"
+        tags={["C#", "Web", "AI", "Arduino", "Raspberry Pi", "音響改裝"]}
+    />
+    <div class="main">
+        <section>
+            <h2 class="section-title">所有標籤</h2>
+            <div class="tag-list">
+                {
+                    allTags.map((tag) => (
+                        <a
+                            href={`/tags/${tag.replace(/#/g, "sharp")}`}
+                            class="tag"
+                        >
+                            {tag}
+                        </a>
+                    ))
+                }
+            </div>
+        </section>
+
+        <Sidebar {allPosts} {allTags} />
+    </div>
 </BaseLayout>
+
+<style>
+    .main {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 0 var(--space-lg) var(--space-2xl);
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: var(--space-xl);
+    }
+
+    .section-title {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-sm);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
+
+    .tag {
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+        padding: 0.2rem 0.6rem;
+        border-radius: var(--radius-sm);
+        background: var(--color-tag-bg);
+        color: var(--color-text-secondary);
+        transition:
+            background 0.2s,
+            color 0.2s;
+        text-decoration: none;
+    }
+
+    .tag:hover {
+        background: var(--color-accent-soft);
+        color: var(--color-accent);
+    }
+
+    @media (max-width: 768px) {
+        .main {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

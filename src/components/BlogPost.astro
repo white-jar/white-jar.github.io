@@ -18,7 +18,7 @@ const {
   {tags && tags.length > 0 && (
     <div class="post-tags">
       {tags.map((tag) => (
-        <a href={`/tags/${encodeURIComponent(tag)}`}>#{tag}</a>
+        <a href={`/tags/${tag.replace(/#/g, 'sharp')}`}>#{tag}</a>
       ))}
     </div>
   )}

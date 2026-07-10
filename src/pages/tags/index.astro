@@ -29,7 +29,7 @@ const pageTitle = "標簽索引";
   <div class="tags">
     {tags.map((tag) => (
       <div class="tag">
-        <a href={`/tags/${encodeURIComponent(tag)}`}>{tag}</a>
+        <a href={`/tags/${tag.replace(/#/g, 'sharp')}`}>{tag}</a>
       </div>
     ))}
   </div>

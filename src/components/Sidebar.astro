@@ -10,7 +10,7 @@ for (const post of allPosts) {
   }
 }
 const categories = [...tagCountMap.entries()]
-  .map(([name, count]) => ({ name, count }));
+  .map(([name, count]) => ({ name, count, slug: name.replace(/#/g, 'sharp') }));
 ---
 
 <aside class="sidebar">
@@ -20,7 +20,7 @@ const categories = [...tagCountMap.entries()]
     <h3 class="widget-title">標籤</h3>
     <div class="tag-cloud">
       {allTags.map((tag) => (
-        <a href={`/tags/${encodeURIComponent(tag)}`}>{tag}</a>
+        <a href={`/tags/${tag.replace(/#/g, 'sharp')}`}>{tag}</a>
       ))}
     </div>
   </div>

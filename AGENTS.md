@@ -54,10 +54,11 @@ frontmatter 範例：
 
 ```yaml
 ---
+layout: ../../layouts/MarkdownPostLayout.astro
 title: 我的文章標題
 pubDate: 2026-07-01
 description: 一句話描述這篇文章。
-author: 強・Kelvin
+author: 州・Kevin
 image:
   url: 'https://example.com/hero.jpg'
   alt: '封面圖的替代文字'

@@ -76,6 +76,10 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
     gap: var(--space-xl);
   }
 
+  .post-article {
+    min-width: 0;
+  }
+
   .post-header {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -148,6 +152,39 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
     color: var(--color-text);
   }
 
+  .recent-timeline {
+    margin-top: var(--space-xl);
+  }
+
+  .section-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 768px) {
+    .main {
+      grid-template-columns: 1fr;
+      padding: 0 var(--space-md) var(--space-lg);
+    }
+    .post-header,
+    .post-content {
+      padding: var(--space-lg);
+    }
+    .post-title {
+      font-size: 1.3rem;
+    }
+  }
+</style>
+
+<style is:global>
+  /* .post-content 底下的元素來自 <Content /> 透過 slot 傳入，
+     不會帶有 layout 的 scope 屬性，因此需獨立寫成全域樣式才會生效。 */
   .post-content h2 {
     font-size: 1.25rem;
     font-weight: 600;
@@ -179,7 +216,8 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
 
   .post-content ul,
   .post-content ol {
-    margin: 0 0 var(--space-md) var(--space-lg);
+    margin: 0 0 var(--space-md);
+    padding-left: var(--space-lg);
   }
 
   .post-content li {
@@ -226,38 +264,9 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
     border-radius: 0;
   }
 
-  hr {
+  .post-content hr {
     border: none;
     border-top: 1px solid var(--color-border);
     margin: var(--space-xl) 0;
-  }
-
-  .recent-timeline {
-    margin-top: var(--space-xl);
-  }
-
-  .section-title {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-lg);
-    padding-bottom: var(--space-sm);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  @media (max-width: 768px) {
-    .main {
-      grid-template-columns: 1fr;
-      padding: 0 var(--space-md) var(--space-lg);
-    }
-    .post-header,
-    .post-content {
-      padding: var(--space-lg);
-    }
-    .post-title {
-      font-size: 1.3rem;
-    }
   }
 </style>

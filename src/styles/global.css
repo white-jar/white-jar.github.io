@@ -60,10 +60,6 @@ a {
     text-decoration: none;
 }
 
-ul {
-    list-style: none;
-}
-
 html.dark {
     --color-bg: oklch(17% 0.008 60);
     --color-surface: oklch(22% 0.01 60);

@@ -36,6 +36,10 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
     gap: var(--space-xl);
   }
 
+  .main > section {
+    min-width: 0;
+  }
+
   .section-title {
     font-size: 0.72rem;
     font-weight: 600;

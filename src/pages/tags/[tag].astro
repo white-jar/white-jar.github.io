@@ -67,6 +67,9 @@ const { posts, allPosts, allTags, originalTag } = Astro.props;
         grid-template-columns: 1fr 280px;
         gap: var(--space-xl);
     }
+    .main > section {
+        min-width: 0;
+    }
     .section-title {
         font-size: 0.72rem;
         font-weight: 600;

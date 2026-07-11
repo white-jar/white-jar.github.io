@@ -37,30 +37,26 @@ dotnet add package Serilog.AspNetCore
 * **修改 Program.cs**  
   以下是專案範本一開始產生的 Program.cs 代碼
 
-```
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 app.Run();
 ```
 
@@ -68,70 +64,61 @@ app.Run();
 
 builder.Host.UseSerilog()會透過Serilog pipeline 導向所有的日誌事件
 
-```
-using Serilog;
-using Serilog.Events;
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File("logs/init-log-.log",
-        rollingInterval: RollingInterval.Hour,  //每一小時重新產新新的檔案
-        retainedFileCountLimit: 720             //Log保留時間(24 hr * 30 Day=720)
-    )
-    .CreateLogger();
-
-try {
-    var builder = WebApplication.CreateBuilder(args);
-
-    // Add services to the container.
-
-    builder.Services.AddControllers();
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
-
-builder.Host.UseSerilog();
-
-    var app = builder.Build();
-
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment()) {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
-
-    app.UseHttpsRedirection();
-
-    app.UseAuthorization();
-
-    app.MapControllers();
-
-    app.Run();
-} catch(Exception er) {
-    Log.Fatal(er, "Application terminated unexpectedly");
-} finally {
-    Log.CloseAndFlush();
-}
+```csharp
+using Serilog;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/init-log-.log",
+        rollingInterval: RollingInterval.Hour,  //每一小時重新產新新的檔案
+        retainedFileCountLimit: 720             //Log保留時間(24 hr * 30 Day=720)
+    )
+    .CreateLogger();
+
+try {
+    var builder = WebApplication.CreateBuilder(args);
+    // Add services to the container.
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+    builder.Host.UseSerilog();
+
+    var app = builder.Build();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment()) {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.Run();
+} catch(Exception er) {
+    Log.Fatal(er, "Application terminated unexpectedly");
+} finally {
+    Log.CloseAndFlush();
+}
 ```
 
 * 修改 appsettings.json
 
 開啟appsettings.json將原本預設的 Logging 節段刪除﹐這裏的配置可以由程式(Program.cs)中重新定義或者之後介紹的Serilog 配置檔定義。
 
-```
-
-{
-
-  //刪除以下的配置
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  }
+```jsonc
+{
+  //刪除以下的配置
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
 }
 ```
 
@@ -144,9 +131,13 @@ builder.Host.UseSerilog();
 
 檔案內容如下
 
-|  |
-| --- |
-| 2024-02-11 10:25:10.089 +08:00 [INF] Now listening on: https://localhost:7157 2024-02-11 10:25:10.132 +08:00 [INF] Now listening on: http://localhost:5211 2024-02-11 10:25:10.136 +08:00 [INF] Application started. Press Ctrl+C to shut down. 2024-02-11 10:25:10.138 +08:00 [INF] Hosting environment: Development 2024-02-11 10:25:10.139 +08:00 [INF] Content root path: H:\Git\Serilog\src\SerilogAspNetDemo |
+```log
+2024-02-11 10:25:10.089 +08:00 [INF] Now listening on: https://localhost:7157 
+2024-02-11 10:25:10.132 +08:00 [INF] Now listening on: http://localhost:5211 
+2024-02-11 10:25:10.136 +08:00 [INF] Application started. Press Ctrl+C to shut down. 
+2024-02-11 10:25:10.138 +08:00 [INF] Hosting environment: Development 
+2024-02-11 10:25:10.139 +08:00 [INF] Content root path: H:\Git\Serilog\src\SerilogAspNetDemo 
+```
 
 而Console 如下﹐兩者內容相同
 
@@ -154,15 +145,30 @@ builder.Host.UseSerilog();
 
 實際上我們在觀察Log會需要Request的請求紀錄﹐在Serilog只要加入一行代碼就可以很輕鬆的得到﹐現在Program.cs中加入 app.UseSerilogRequestLoggin(); 就可以
 
-|  |
-| --- |
-| var app = builder.Build();     app.UseSerilogRequestLogging();      // Configure the HTTP request pipeline.     if (app.Environment.IsDevelopment()) {          app.UseSwagger();          app.UseSwaggerUI();         }      app.UseHttpsRedirection(); |
+```csharp
+var app = builder.Build();
+app.UseSerilogRequestLogging();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+```
 
 再次執行檢查Log﹐可以看到比剛剛多了HTTP GET 的紀錄﹐因為專案中使用了swagger﹐所以在Debug模式下啟動 swagger 就會有Request行為而有了HTTP GET 的紀錄
 
-|  |
-| --- |
-| 2024-02-11 10:48:32.670 +08:00 [INF] Now listening on: https://localhost:7157 2024-02-11 10:48:32.753 +08:00 [INF] Now listening on: http://localhost:5211 2024-02-11 10:48:32.757 +08:00 [INF] Application started. Press Ctrl+C to shut down. 2024-02-11 10:48:32.759 +08:00 [INF] Hosting environment: Development 2024-02-11 10:48:32.760 +08:00 [INF] Content root path: H:\Git\Serilog\src\SerilogAspNetDemo 2024-02-11 10:48:34.585 +08:00 [INF] HTTP GET /swagger/index.html responded 200 in 134.0189 ms 2024-02-11 10:48:35.075 +08:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 201.3387 ms |
+```log
+2024-02-11 10:48:32.670 +08:00 [INF] Now listening on: https://localhost:7157 
+2024-02-11 10:48:32.753 +08:00 [INF] Now listening on: http://localhost:5211 
+2024-02-11 10:48:32.757 +08:00 [INF] Application started. Press Ctrl+C to shut down. 
+2024-02-11 10:48:32.759 +08:00 [INF] Hosting environment: Development 
+2024-02-11 10:48:32.760 +08:00 [INF] Content root path: H:\Git\Serilog\src\SerilogAspNetDemo 
+2024-02-11 10:48:34.585 +08:00 [INF] HTTP GET /swagger/index.html responded 200 in 134.0189 ms 
+2024-02-11 10:48:35.075 +08:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 201.3387 ms 
+```
 
 **五﹑二段段初始化**
 
@@ -172,23 +178,56 @@ builder.Host.UseSerilog();
 
 首先將原本的CreateLogger()改為CreateBootstrapLogger()
 
-|  |
-| --- |
-| Log.Logger = new LoggerConfiguration()     .MinimumLevel.Information()     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)     .Enrich.FromLogContext()     .WriteTo.Console()     .WriteTo.File("logs/init-log-.log",         //產生的log文字檔﹐檔名是init-log開頭         rollingInterval: RollingInterval.Hour,  //每一小時重新產新新的檔案         retainedFileCountLimit: 720             //Log保留時間(24 hr \* 30 Day=720)     )     .CreateBootstrapLogger(); |
+```csharp
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/init-log-.log",     //產生的log文字檔﹐檔名是init-log開頭
+        rollingInterval: RollingInterval.Hour,  //每一小時重新產新新的檔案
+        retainedFileCountLimit: 720              //Log保留時間(24 hr * 30 Day=720)
+    )
+    .CreateBootstrapLogger();
+```
 
 接著修改原本的builder.Host.UserSerilog()﹐這裏將輸出的log檔案檔名設定為 All- 開頭﹐目的是要觀察和第一階段的初始化的比較。
 
-|  |
-| --- |
-| //builder.Host.UseSerilog(); builder.Host.UseSerilog((context, services, configuration) => configuration     .ReadFrom.Configuration(context.Configuration)  //從設定檔中讀取     .ReadFrom.Services(services)     .Enrich.FromLogContext()     .WriteTo.Console()     .WriteTo.File("logs/All-.log",         rollingInterval: RollingInterval.Hour,         retainedFileCountLimit: 720) ); |
+```csharp
+//builder.Host.UseSerilog();
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)  //從設定檔中讀取
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/All-.log",
+        rollingInterval: RollingInterval.Hour,
+        retainedFileCountLimit: 720)
+);
+```
 
 修改 appsettings.json
 
 前面已介紹過將原本預設的 Loggin節段拿掉﹐現在加上Serilog節段﹐同時為了測試效果﹐將”Microsoft.AspNetCore”由Warning改為 Debug
 
-|  |
-| --- |
-| {   //"Logging": {   //   "LogLevel": {   //     "Default": "Information",   //     "Microsoft.AspNetCore": "Warning"   //   }   //}   "Serilog": {     "MinimumLevel": {       "Default": "Information",       "Override": {         "Microsoft.AspNetCore": "Debug"       }     }   } } |
+```jsonc
+{
+  //"Logging": {
+  //  "LogLevel": {
+  //    "Default": "Information",
+  //    "Microsoft.AspNetCore": "Warning"
+  //  }
+  //}
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft.AspNetCore": "Debug"
+      }
+    }
+  }
+}
+```
 
 再次執行程式﹐可以看到現在多了一個All-開頭的log檔﹐不過檔案時間可以看到原本的init-log- 時間並沒有變化﹐這是因為在一開始啟動程式後被二階段的導向到之後的All- log 中﹐所以最前面第一階段的初始化其實可以做簡化。
 
@@ -204,9 +243,32 @@ builder.Host.UseSerilog();
 
 UsersController中加入兩個方法進行觀察
 
-|  |
-| --- |
-| using Microsoft.AspNetCore.Mvc;  namespace SerilogAspNetDemo.Controllers {     [Route("api/[controller]")]     [ApiController]     public class UsersController : ControllerBase {         private readonly ILogger<UsersController> \_logger;         public UsersController(ILogger<UsersController> logger) {             \_logger = logger;         }          [HttpGet]         public IActionResult Say(string value) {             \_logger.LogInformation($"輸入的資料：{value}");             return Ok(new { Id = 1, Value = $"You say {value}" });         }          [HttpPost]         public IActionResult GetUser(string agentid) {             \_logger.LogInformation($"Agent：{agentid}");             return Ok(new { AgentId = agentid, Name = "Tester" });         }     } } |
+```csharp
+using Microsoft.AspNetCore.Mvc;
+
+namespace SerilogAspNetDemo.Controllers {
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UsersController : ControllerBase {
+        private readonly ILogger<UsersController> _logger;
+        public UsersController(ILogger<UsersController> logger) {
+            _logger = logger;
+        }
+
+        [HttpGet]
+        public IActionResult Say(string value) {
+            _logger.LogInformation($"輸入的資料：{value}");
+            return Ok(new { Id = 1, Value = $"You say {value}" });
+        }
+
+        [HttpPost]
+        public IActionResult GetUser(string agentid) {
+            _logger.LogInformation($"Agent：{agentid}");
+            return Ok(new { AgentId = agentid, Name = "Tester" });
+        }
+    }
+}
+```
 
 執行程式後﹐在swagger中執行兩個Api來看Log 有什麼東西
 
@@ -218,9 +280,17 @@ Serilog有一項功能就是結構化的輸出﹐以JSON的樣式顯示﹐在官
 
 開啟 Program.cs 在builder.Host.UseSerilog 中的 WriteTo.Console及 WriteTo.File 做一下修改
 
-|  |
-| --- |
-| builder.Host.UseSerilog((context, services, configuration) => configuration          .ReadFrom.Configuration(context.Configuration)  //從設定檔中讀取         .ReadFrom.Services(services)         .Enrich.FromLogContext()         .WriteTo.Console(new Serilog.Formatting.Compact.CompactJsonFormatter())         .WriteTo.File(new Serilog.Formatting.Compact.CompactJsonFormatter(), "logs/All-.log",             rollingInterval: RollingInterval.Hour,             retainedFileCountLimit: 720)     ); |
+```csharp
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)  //從設定檔中讀取
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new Serilog.Formatting.Compact.CompactJsonFormatter())
+    .WriteTo.File(new Serilog.Formatting.Compact.CompactJsonFormatter(), "logs/All-.log",
+        rollingInterval: RollingInterval.Hour,
+        retainedFileCountLimit: 720)
+);
+```
 
 執行後看一下Console和檔案呈現的樣式
 
@@ -228,9 +298,43 @@ Serilog有一項功能就是結構化的輸出﹐以JSON的樣式顯示﹐在官
 
 取當中幾段來看看
 
-|  |
-| --- |
-| { "@t":"2024-02-11T08:02:48.7863365Z", "@mt":"Now listening on: {address}", "address":"https://localhost:7157", "EventId":{"Id":14,"Name":"ListeningOnAddress"}, "SourceContext":"Microsoft.Hosting.Lifetime" }  { "@t":"2024-02-11T08:03:07.1545229Z", "@mt":"輸入的資料：Hello", "@tr":"3bc3114734d75c5c62c87f487b984368", "@sp":"bcddf0c93609ac90", "SourceContext":"SerilogAspNetDemo.Controllers.UsersController", "ActionId":"e3f2537c-9492-46f7-8b8d-771e8cb7d2f5", "ActionName":"SerilogAspNetDemo.Controllers.UsersController.Say (SerilogAspNetDemo)", "RequestId":"0HN1AQVBECPA8:00000001", "RequestPath":"/api/Users", "ConnectionId":"0HN1AQVBECPA8" }  { "@t":"2024-02-11T08:03:07.1646600Z", "@mt":"HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms", "@r":["50.0727"], @tr":"3bc3114734d75c5c62c87f487b984368", "@sp":"bcddf0c93609ac90", "RequestMethod":"GET", "RequestPath":"/api/Users", "StatusCode":200, "Elapsed":50.0727, "SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware", "RequestId":"0HN1AQVBECPA8:00000001", "ConnectionId":"0HN1AQVBECPA8" } |
+```json
+{ 
+    "@t":"2024-02-11T08:02:48.7863365Z", 
+    "@mt":"Now listening on: {address}", 
+    "address":"https://localhost:7157", 
+    "EventId":{"Id":14,"Name":"ListeningOnAddress"}, 
+    "SourceContext":"Microsoft.Hosting.Lifetime" 
+}
+
+{ 
+    "@t":"2024-02-11T08:03:07.1545229Z", 
+    "@mt":"輸入的資料：Hello", 
+    "@tr":"3bc3114734d75c5c62c87f487b984368", 
+    "@sp":"bcddf0c93609ac90", 
+    "SourceContext":"SerilogAspNetDemo.Controllers.UsersController", 
+    "ActionId":"e3f2537c-9492-46f7-8b8d-771e8cb7d2f5", 
+    "ActionName":"SerilogAspNetDemo.Controllers.UsersController.Say (SerilogAspNetDemo)", 
+    "RequestId":"0HN1AQVBECPA8:00000001", 
+    "RequestPath":"/api/Users", 
+    "ConnectionId":"0HN1AQVBECPA8" 
+}
+
+{ 
+    "@t":"2024-02-11T08:03:07.1646600Z", 
+    "@mt":"HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms", 
+    "@r":["50.0727"], 
+    "@tr":"3bc3114734d75c5c62c87f487b984368", 
+    "@sp":"bcddf0c93609ac90", 
+    "RequestMethod":"GET", 
+    "RequestPath":"/api/Users", 
+    "StatusCode":200, 
+    "Elapsed":50.0727, 
+    "SourceContext":"Serilog.AspNetCore.RequestLoggingMiddleware", 
+    "RequestId":"0HN1AQVBECPA8:00000001", 
+    "ConnectionId":"0HN1AQVBECPA8" 
+}
+```
 
 這裏面提供的資訊比之前更豐富﹐當中有幾個是@開頭的﹐代表的意義如下
 

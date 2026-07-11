@@ -16,15 +16,106 @@ tags: ['Serilog', 'C#', '.Net']
 
 先在 appsettings.json中加入新的設定﹐藍字的部分就是這次加入的部分﹐在混雜所有log的檔名改為 ALL-JSON- 開頭﹐而獨立的Controller log 檔名則為api-JSON- 開頭﹐特別注意在獨立的 Controller log 中將outputTemplate註解掉﹐留著這一段註解是要強調 formatter 和 outputTemplate 不能同時存在
 
-|  |
-| --- |
-| {   //"Logging": {   //  "LogLevel": {   //    "Default": "Information",   //    "Microsoft.AspNetCore": "Warning"   //  }   //},   "Serilog": {     "MinimumLevel": {       "Default": "Information",       "Override": {          "Microsoft.AspNetCore": "Warning"        }     },     "WriteTo": [        { "Name": "Console" },        {          "Name": "File",          "Args": {            "Path": "logs/All-.log",            "rollingInterval": "Hour",            "retainedFileCountLimit": 720          }        },        {          "Name": "Logger",          "Args": {            "Filter": "ByIncludingOnly",            "Contains": "Controller",            "Path": "logs/api-.log",            "rollingInterval": "Hour",            "retainedFileCountLimit": 720,            "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {ControllerName} {Message:lj}{NewLine}{Exception}"          }        },        {          "Name": "Logger",          "Args": {            "Filter": "ByExcluding",            "Contains": "Controller",           "Path": "logs/server-.log",            "rollingInterval": "Hour",            "retainedFileCountLimit": 720          }        },       {         "Name": "File",         "Args": {           "Path": "logs/All-JSON-.log",           "rollingInterval": "Hour",           "retainedFileCountLimit": 720,           "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact"         }       },       {         "Name": "Logger",         "Args": {           "Filter": "ByIncludingOnly",           "Contains": "Controller",           "Path": "logs/api-JSON-.log",           "rollingInterval": "Hour",           "retainedFileCountLimit": 720,           //"outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {ControllerName} {Message:lj}{NewLine}{Exception}"         }       }     ]   },   "AllowedHosts": "\*" } |
+```jsonc
+{
+  //"Logging": {
+  //  "LogLevel": {
+  //    "Default": "Information",
+  //    "Microsoft.AspNetCore": "Warning"
+  //  }
+  //},
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft.AspNetCore": "Warning"
+      }
+    },
+    "WriteTo": [
+      { "Name": "Console" },
+      {
+        "Name": "File",
+        "Args": {
+          "Path": "logs/All-.log",
+          "rollingInterval": "Hour",
+          "retainedFileCountLimit": 720
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "Filter": "ByIncludingOnly",
+          "Contains": "Controller",
+          "Path": "logs/api-.log",
+          "rollingInterval": "Hour",
+          "retainedFileCountLimit": 720,
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {ControllerName} {Message:lj}{NewLine}{Exception}"
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "Filter": "ByExcluding",
+          "Contains": "Controller",
+          "Path": "logs/server-.log",
+          "rollingInterval": "Hour",
+          "retainedFileCountLimit": 720
+        }
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "Path": "logs/All-JSON-.log",
+          "rollingInterval": "Hour",
+          "retainedFileCountLimit": 720,
+          "formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact"
+        }
+      },
+      {
+        "Name": "Logger",
+        "Args": {
+          "Filter": "ByIncludingOnly",
+          "Contains": "Controller",
+          "Path": "logs/api-JSON-.log",
+          "rollingInterval": "Hour",
+          "retainedFileCountLimit": 720,
+          //"outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {ControllerName} {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ]
+  },
+  "AllowedHosts": "*"
+}
+```
 
 接著修改原本的代碼﹐說明一下在 builder.Host.UseSerilog 中對於產出所有混雜的log沒有特別力入其它的代碼﹐是因為在appsettings.json 加上就可以了﹐而獨立的Controller log 需要特別經過過濾所以在代碼中要另外撰寫﹐而且這次加入的代碼﹐可以看到是取 SourceContext 並沒有特別指定 ControllerName
 
-|  |
-| --- |
-| var setting = builder.Configuration;      builder.Host.UseSerilog((context, services, configuration) => configuration          .ReadFrom.Configuration(context.Configuration)  //從設定檔中讀取          .ReadFrom.Services(services)          .Enrich.FromLogContext()          .Enrich.With(new LogEnricher())          .WriteTo.Logger(lc => lc.Filter.ByIncludingOnly(e =>              e.Properties["ControllerName"].ToString().Contains("Controller"))              .WriteTo.File(setting["Serilog:WriteTo:2:Args:Path"],                 rollingInterval: Enum.Parse<RollingInterval>(setting["Serilog:WriteTo:2:Args:rollingInterval"]),                 retainedFileCountLimit: int.Parse(setting["Serilog:WriteTo:2:Args:retainedFileCountLimit"]),                 outputTemplate: setting["Serilog:WriteTo:2:Args:outputTemplate"]))          .WriteTo.Logger(lc=>lc.Filter.ByExcluding(e=>              e.Properties["SourceContext"].ToString().Contains("Controller"))              .WriteTo.File(setting["Serilog:WriteTo:3:Args:Path"],                 rollingInterval: Enum.Parse<RollingInterval>(setting["Serilog:WriteTo:3:Args:rollingInterval"]),                 retainedFileCountLimit: int.Parse(setting["Serilog:WriteTo:3:Args:retainedFileCountLimit"])))         .WriteTo.Logger(lc => lc.Filter.ByIncludingOnly(e =>             e.Properties["SourceContext"].ToString().Contains("Controller"))             .WriteTo.File(new CompactJsonFormatter(), setting["Serilog:WriteTo:5:Args:Path"],                 rollingInterval: Enum.Parse<RollingInterval>(setting["Serilog:WriteTo:5:Args:rollingInterval"]),                 retainedFileCountLimit: int.Parse(setting["Serilog:WriteTo:5:Args:retainedFileCountLimit"])))     ); |
+```csharp
+var setting = builder.Configuration;
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)  //從設定檔中讀取
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .Enrich.With(new LogEnricher())
+    .WriteTo.Logger(lc => lc.Filter.ByIncludingOnly(e =>
+        e.Properties["ControllerName"].ToString().Contains("Controller"))
+        .WriteTo.File(setting["Serilog:WriteTo:2:Args:Path"],
+            rollingInterval: Enum.Parse<RollingInterval>(setting["Serilog:WriteTo:2:Args:rollingInterval"]),
+            retainedFileCountLimit: int.Parse(setting["Serilog:WriteTo:2:Args:retainedFileCountLimit"]),
+            outputTemplate: setting["Serilog:WriteTo:2:Args:outputTemplate"]))
+    .WriteTo.Logger(lc => lc.Filter.ByExcluding(e =>
+        e.Properties["SourceContext"].ToString().Contains("Controller"))
+        .WriteTo.File(setting["Serilog:WriteTo:3:Args:Path"],
+            rollingInterval: Enum.Parse<RollingInterval>(setting["Serilog:WriteTo:3:Args:rollingInterval"]),
+            retainedFileCountLimit: int.Parse(setting["Serilog:WriteTo:3:Args:retainedFileCountLimit"])))
+    .WriteTo.Logger(lc => lc.Filter.ByIncludingOnly(e =>
+        e.Properties["SourceContext"].ToString().Contains("Controller"))
+        .WriteTo.File(new CompactJsonFormatter(), setting["Serilog:WriteTo:5:Args:Path"],
+            rollingInterval: Enum.Parse<RollingInterval>(setting["Serilog:WriteTo:5:Args:rollingInterval"]),
+            retainedFileCountLimit: int.Parse(setting["Serilog:WriteTo:5:Args:retainedFileCountLimit"])))
+);
+```
 
 同樣的再執行一次﹐也在兩個Controller的Action各執行一次﹐現在應該一共會有5個Log檔
 

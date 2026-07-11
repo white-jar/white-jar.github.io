@@ -179,7 +179,8 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
 
   .post-content ul,
   .post-content ol {
-    margin: 0 0 var(--space-md) var(--space-lg);
+    margin: 0 0 var(--space-md);
+    padding-left: var(--space-lg);
   }
 
   .post-content li {

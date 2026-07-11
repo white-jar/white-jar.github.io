@@ -338,9 +338,8 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 
 這裏面提供的資訊比之前更豐富﹐當中有幾個是@開頭的﹐代表的意義如下
 
-|  |  |  |  |
-| --- | --- | --- | --- |
 | **Property** | **Name** | **Description** | **Required?** |
+| --- | --- | --- | --- |
 | **@t** | Timestamp | An ISO 8601 timestamp | Yes |
 | **@m** | Message | A fully-rendered message describing the event |  |
 | **@mt** | Message Template | Alternative to Message; specifies a message template over the event's properties that provides for rendering into a textual description of the event |  |

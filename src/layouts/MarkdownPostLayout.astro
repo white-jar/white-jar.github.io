@@ -269,4 +269,25 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
     border-top: 1px solid var(--color-border);
     margin: var(--space-xl) 0;
   }
+
+  .post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-lg) 0;
+    font-size: 0.92rem;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .post-content th,
+  .post-content td {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.85rem;
+    text-align: left;
+  }
+
+  .post-content th {
+    background: var(--color-tag-bg);
+    font-weight: 600;
+  }
 </style>

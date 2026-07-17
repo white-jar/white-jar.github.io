@@ -23,5 +23,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# Claude Code project skills
-.claude/skills/
+# AI
+.claude/
+.opencode/
+AGENTS.md
+CLAUDE.md
+openspec/

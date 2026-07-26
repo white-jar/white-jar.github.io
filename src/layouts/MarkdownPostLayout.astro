@@ -4,6 +4,7 @@ import BaseLayout from './BaseLayout.astro';
 import Profile from '../components/Profile.astro';
 import Sidebar from '../components/Sidebar.astro';
 import PostTimelineList from '../components/PostTimelineList.astro';
+import ViewCounter from '../components/ViewCounter.jsx';
 import {Icon} from 'astro-icon/components';
 
 const { frontmatter, postId } = Astro.props;
@@ -27,6 +28,8 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
           </time>
           <span class="meta-sep">·</span>
           <span>{frontmatter.author}</span>
+          <span class="meta-sep">·</span>
+          <ViewCounter client:load path={`/posts/${postId}`} mode="increment" />
         </div>
         {frontmatter.description && (
           <p class="post-description">{frontmatter.description}</p>
@@ -107,6 +110,10 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
 
   .meta-sep {
     color: var(--color-border);
+  }
+
+  .post-meta-bar :global(.view-counter) {
+    font-family: var(--font-mono);
   }
 
   .post-description {

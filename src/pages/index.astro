@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Profile from "../components/Profile.astro";
 import Sidebar from "../components/Sidebar.astro";
+import ViewCounter from "../components/ViewCounter.jsx";
 
 const allPosts = await getCollection("blog");
 const sortedPosts = allPosts.sort(
@@ -46,6 +47,12 @@ const categories = [
                                             .toISOString()
                                             .slice(0, 10)}
                                     </time>
+                                    <span class="meta-sep">·</span>
+                                    <ViewCounter
+                                        client:load
+                                        path={`/posts/${post.id}`}
+                                        mode="readonly"
+                                    />
                                 </div>
                                 <h2>
                                     <a href={`/posts/${post.id}`}>
@@ -130,6 +137,13 @@ const categories = [
         font-size: 0.78rem;
         color: var(--color-text-secondary);
         margin-bottom: var(--space-xs);
+    }
+    .post-meta .meta-sep {
+        color: var(--color-border);
+    }
+    .post-meta :global(.view-counter) {
+        font-family: var(--font-mono);
+        color: var(--color-text-secondary);
     }
     .post-card h2 {
         font-size: 1.2rem;

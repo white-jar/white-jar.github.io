@@ -26,6 +26,7 @@ pnpm-debug.log*
 # AI
 .claude/
 .opencode/
+.agents/
 AGENTS.md
 CLAUDE.md
 openspec/

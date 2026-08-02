@@ -271,6 +271,30 @@ const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
     border-radius: 0;
   }
 
+  .post-content .mermaid {
+    margin: var(--space-lg) 0;
+    text-align: center;
+    overflow-x: auto;
+  }
+
+  .post-content .mermaid svg {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+  }
+
+  .post-content .mermaid-theme-dark {
+    display: none;
+  }
+
+  html.dark .post-content .mermaid-theme-light {
+    display: none;
+  }
+
+  html.dark .post-content .mermaid-theme-dark {
+    display: block;
+  }
+
   .post-content hr {
     border: none;
     border-top: 1px solid var(--color-border);

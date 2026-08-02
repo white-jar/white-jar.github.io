@@ -28,6 +28,14 @@ npm run preview    # 在本機提供已建置的 dist/
 - **`npm run dev` 下 `/pagefind/` 不存在，搜尋在執行期會失敗** — 這不是 bug。要測搜尋，先 `npm run build` 再 `npm run preview`。
 - 部署工作流程（`.github/workflows/astro.yml`）**已包含** `npx pagefind --site dist` 步驟，線上站台的搜尋正常。
 
+### Mermaid 圖表渲染
+
+- ` ```mermaid ``` ` 程式碼區塊在 **build 時** 渲染成 inline SVG（零 client JS），透過自訂 rehype plugin `src/utils/rehype-mermaid-dual.js`（底層是 `mermaid-isomorphic` + Playwright）。
+- 每個圖會渲染 **light 與 dark 兩份 SVG**，包在 `<div class="mermaid">` 內，以本站的 `html.dark` class 切換（`.mermaid-theme-light` / `.mermaid-theme-dark`，樣式在 `MarkdownPostLayout.astro` 的 `is:global` 區塊）。
+- `astro.config.mjs` 已設定 `markdown.syntaxHighlight.excludeLangs: ['mermaid']` 與 `markdown.rehypePlugins: [rehypeMermaidDual]`，兩者缺一不可（不排除的話 Shiki 會先拆散 diagram 字串）。
+- **需要 Playwright Chromium**：本機首次跑 build 前先 `npx playwright install chromium`；CI（`.github/workflows/astro.yml`）已安裝 `--with-deps chromium` 與 `fonts-noto-color-emoji`（Ubuntu 上 emoji 需字型否則顯示方框）。
+- 渲染失敗時 plugin 保留原 code block 並在 build 印出警告，不會讓 build 失敗。`npm run dev` 下同樣會渲染（本機需已裝 Chromium）。
+
 ## 內容管線
 
 - 文章存放於 `src/blog/**/*.md`。以 `_` 為前綴的檔案會被 glob loader 排除。

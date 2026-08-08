@@ -2,6 +2,7 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import "../styles/global.css";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 const { pageTitle } = Astro.props;
 ---
 
@@ -11,7 +12,8 @@ const { pageTitle } = Astro.props;
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
-        <title>{pageTitle} | 純白罐子</title>
+        <meta name="description" content={SITE_DESCRIPTION} />
+        <title>{pageTitle} | {SITE_TITLE}</title>
     </head>
     <body>
         <Header />

@@ -1,20 +1,22 @@
 ---
+import { PROFILE } from "../consts";
+
 interface Props {
-    name: string;
-    subtitle: string;
-    bio: string;
-    tags: string[];
+    name?: string;
+    subtitle?: string;
+    bio?: string;
+    tags?: string[];
     backgroundImage?: string;
     avatarImage?: string;
 }
 
 const {
-    name,
-    subtitle,
-    bio,
-    tags,
-    backgroundImage = "/images/工作桌-gemine-1.png",
-    avatarImage = "/images/Jar-210.png",
+    name = PROFILE.name,
+    subtitle = PROFILE.subtitle,
+    bio = PROFILE.bio,
+    tags = PROFILE.tags,
+    backgroundImage = PROFILE.backgroundImage,
+    avatarImage = PROFILE.avatarImage,
 } = Astro.props;
 ---
 

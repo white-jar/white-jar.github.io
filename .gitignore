@@ -30,3 +30,5 @@ pnpm-debug.log*
 AGENTS.md
 CLAUDE.md
 openspec/
+_bmad/
+_bmad-output/

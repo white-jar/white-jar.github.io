@@ -12,12 +12,7 @@ const allPosts = await getCollection('blog');
 const allTags = [...new Set(allPosts.map(p => p.data.tags).flat())].sort();
 ---
 <BaseLayout pageTitle={frontmatter.title}>
-  <Profile
-    name="純白罐子"
-    subtitle="州・Kevin"
-    bio="我將邏輯與演算投入罐子, 碎片化的程式碼以滴漏方式逐步加入, 以思緒做攪拌捧徐徐的攪拌, 以舊日情懷的溫度進行催化, 罐子中進行一連串的反應, 當溫度回到常溫, 拿出濾紙過濾, 竟然萃取出一堆的 bug。"
-    tags={["C#", "Web", "AI", "Arduino", "Raspberry Pi", "音響改裝"]}
-  />
+  <Profile />
   <div class="main">
     <article class="post-article">
       <header class="post-header">
